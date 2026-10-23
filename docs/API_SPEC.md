@@ -52,7 +52,7 @@ Các tham số lọc (filter) riêng theo từng bảng:
 
 ## 3. Danh sách toàn bộ Endpoints theo từng Phân hệ
 
-### A. Xác thực & Tài khoản (Auth & Profile — Giai đoạn 3, 5, 9, 10)
+### A. Xác thực & Tài khoản
 
 | Method | Endpoint                  | Quyền  | Mô tả                                                 |
 | ------ | ------------------------- | ------ | ----------------------------------------------------- |
@@ -67,7 +67,7 @@ Các tham số lọc (filter) riêng theo từng bảng:
 | PUT    | /api/profile              | Auth   | Cập nhật hồ sơ (họ tên, năm sinh, địa chỉ, sđt)       |
 | PUT    | /api/profile/password     | Auth   | Đổi mật khẩu (yêu cầu nhập mật khẩu hiện tại)         |
 
-### B. Dịch vụ & Sử dụng công cụ (Services & Tools — Giai đoạn 6, 7)
+### B. Dịch vụ & Sử dụng công cụ
 
 | Method | Endpoint                 | Quyền  | Mô tả                                                                                                                 |
 | ------ | ------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------- |
@@ -77,7 +77,7 @@ Các tham số lọc (filter) riêng theo từng bảng:
 | POST   | /api/tools/:slug/execute | Auth   | Chạy công cụ (Upload file/text -> kiểm tra & trừ credit -> trả kết quả -> ghi usage_logs)                             |
 | GET    | /api/history             | Auth   | Lịch sử sử dụng của chính user đó (Phân trang, Tìm kiếm theo tên công cụ/file, Lọc theo danh mục/trạng thái, Sắp xếp) |
 
-### C. Thanh toán Online (Payments — Giai đoạn 11)
+### C. Thanh toán Online
 
 | Method | Endpoint                   | Quyền  | Mô tả                                                                                                      |
 | ------ | -------------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
@@ -86,7 +86,7 @@ Các tham số lọc (filter) riêng theo từng bảng:
 | GET    | /api/payments/vnpay-return | Public | Xử lý kết quả trả về trình duyệt                                                                           |
 | GET    | /api/payments/vnpay-ipn    | Public | Webhook/IPN: Xác minh chữ ký HMAC -> mở SQL Transaction cộng Credit/nâng cấp Premium -> gửi email biên lai |
 
-### D. Quản trị viên (Admin — Giai đoạn 8)
+### D. Quản trị viên
 
 (Tất cả đều đi qua middleware requireAuth và requireRole('admin'). Mọi API GET danh sách đều bắt buộc có Phân trang, Tìm kiếm, Sắp xếp, Lọc)
 
