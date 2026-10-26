@@ -7,6 +7,8 @@ import path from "path";
 import db from "./config/database";
 import { getCategories } from "./controllers/category.controller";
 
+import authRotes from "./routes/auth.routes";
+
 dotenv.config({ path: path.resolve(__dirname, "../.env")});
 
 const app = express();
@@ -27,6 +29,8 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.get("/api/categories", getCategories);
+
+app.use("/api", authRotes);
 
 app.listen(PORT, async () => {
     console.log(`Server đang chạy tại: http://localhost:${PORT}`);
