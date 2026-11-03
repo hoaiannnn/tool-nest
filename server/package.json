@@ -1,28 +1,23 @@
 {
-  "name": "server",
+  "name": "toolnest-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "migrate:latest": "tsx ./node_modules/knex/bin/cli.js migrate:latest --knexfile knexfile.ts",
-    "migrate:rollback": "tsx ./node_modules/knex/bin/cli.js migrate:rollback --knexfile knexfile.ts",
-    "seed:run": "tsx ./node_modules/knex/bin/cli.js seed:run --knexfile knexfile.ts"
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "migrate": "npx knex migrate:latest --knexfile knexfile.js",
+    "seed": "npx knex seed:run --knexfile knexfile.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "dotenv": "^18.0.8",
-    "knex": "^3.3.0",
-    "mssql": "^12.7.10"
-  },
-  "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^26.6.5",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "knex": "^3.1.0",
+    "tedious": "^18.6.1",
+    "zod": "^3.23.8"
   }
 }

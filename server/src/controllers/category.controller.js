@@ -1,12 +1,8 @@
-import { Request, Response } from "express";
-import db from "../config/database";
+const db = require("../config/database");
 
-export const getCategories = async (_req: Request, res: Response) => {
+const getAllCategories = async (_req, res) => {
     try {
-        const categories = await db("categories")
-        .select("id", "slug", "name", "icon", "sort_order")
-        .orderBy("sort_order", "asc");
-
+        const categories = await db("categories").select("*").orderBy("sort_order", "asc");
         res.status(200).json({
             success: true,
             message: "Lấy danh sách danh mục thành công",
@@ -17,6 +13,8 @@ export const getCategories = async (_req: Request, res: Response) => {
         res.status(500).json({
             success: false,
             message: "Lỗi máy chủ khi lấy danh mục",
-        })
+        });
     }
 };
+
+module.exports = { getAllCategories };
