@@ -1,25 +1,10 @@
-import { Link } from "react-router-dom";
-import ServiceCard, { ICONS } from "../components/ServiceCard";
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import ServiceCard, { ICONS } from "../components/ServiceCard";
+import { CATEGORIES } from "../data/servicesData";
+import { useServices } from "../lib/useServices";
 
 const RECENT = ["PDF sang JPG", "Tắt tiếng video", "Nén ảnh"];
-
-const CATEGORIES = [
-  { id: "pdf", name: "Công cụ PDF", sub: "Giải quyết việc với PDF", count: 4, feature: "Gộp PDF" },
-  { id: "img", name: "Công cụ ảnh", sub: "Giải quyết việc với ảnh", count: 3, feature: "Nén ảnh" },
-  { id: "vid", name: "Công cụ video", sub: "Giải quyết việc với video", count: 2, feature: "Tắt tiếng" },
-  { id: "ai", name: "AI viết", sub: "Giải quyết việc với văn bản", count: 2, feature: "Viết đoạn văn" },
-  { id: "file", name: "Công cụ tệp", sub: "Giải quyết việc với tệp", count: 2, feature: "CSV sang Excel" },
-];
-
-const POPULAR = [
-  { id: 5, name: "Nén ảnh", desc: "Giảm dung lượng ảnh, giữ chất lượng.", status: "ready", category: "img" },
-  { id: 1, name: "Gộp PDF", desc: "Ghép nhiều tệp PDF thành một tệp.", status: "ready", category: "pdf" },
-  { id: 11, name: "Viết đoạn văn", desc: "Nhập ý chính, nhận đoạn văn hoàn chỉnh.", status: "ready", category: "ai" },
-  { id: 6, name: "Đổi định dạng ảnh", desc: "Chuyển qua lại giữa PNG, JPG và WebP.", status: "ready", category: "img" },
-  { id: 12, name: "Tóm tắt văn bản", desc: "Rút gọn bài dài thành vài câu chính.", status: "ready", category: "ai" },
-  { id: 2, name: "Tách PDF", desc: "Chọn trang cần tách ra khỏi tệp PDF.", status: "ready", category: "pdf" },
-];
 
 const STEPS = [
   { title: "Chọn công cụ", text: "Tìm theo tên hoặc mở đúng danh mục bạn cần." },
@@ -27,33 +12,28 @@ const STEPS = [
   { title: "Tải kết quả về", text: "Nhận tệp đã xử lý. Đăng nhập để xem lại lịch sử sử dụng." },
 ];
 
-const WORDS = ["Học tập", "Công việc", "Tài liệu", "Thiết kế"];
-
 export default function Home() {
+  const navigate = useNavigate();
+  const services = useServices() ?? [];
   const [wordIndex, setWordIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
 
-  useEffect(() => {
-    let timeoutId;
+  const countByCategory = (id) => services.filter((s) => s.category === id).length;
 
-    const intervalId = setInterval(() => {
-      setIsFading(true);
-      timeoutId = setTimeout(() => {
-        setWordIndex((prev) => (prev + 1) % WORDS.length);
-        setIsFading(false);
-      }, 250);
-    }, 2800);
-
-    return () => {
-      clearInterval(intervalId);
-      clearTimeout(timeoutId);
-    }
-  })
+  const popular = [...services]
+    .filter((s) => s.status === "ready")
+    .sort((a, b) => b.uses - a.uses)
+    .slice(0, 6);
+    
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = new FormData(e.currentTarget).get("q")?.trim();
+    navigate(q ? `/services?q=${encodeURIComponent(q)}` : "/services");
+  };
 
   return (
     <section className="home">
       <div className="container">
-        
         <div className="home-recent">
           <b className="home-recent__label">Dùng gần đây:</b>
           {RECENT.map((q) => (
@@ -65,16 +45,16 @@ export default function Home() {
 
         <div className="home-hero">
           <h1 className="home-hero__title">
-            Công cụ miễn phí giúp
+            Công cụ miễn phí giúp{" "}
             <span className="home-hero__highlight">
-              Học tập
-            </span>
+                Học tập
+            </span>{" "}
             đơn giản
           </h1>
           <p className="home-hero__desc">
             PDF, ảnh, video, văn bản và tệp dữ liệu. Mở trình duyệt là dùng được, không cần cài đặt.
           </p>
-          <form className="home-hero__search" action="/services" method="get" role="search">
+          <form className="home-hero__search" onSubmit={handleSearchSubmit} role="search">
             <input
               className="home-hero__input"
               type="search"
@@ -94,7 +74,7 @@ export default function Home() {
                   <span className="category-card__icon">
                     <svg className="icon" viewBox="0 0 24 24">{ICONS[c.id]}</svg>
                   </span>
-                  <span className="category-card__count">{c.count} công cụ</span>
+                  <span className="category-card__count">{countByCategory(c.id)} công cụ</span>
                 </div>
                 <div>
                   <h3 className="category-card__title">{c.name}</h3>
@@ -114,7 +94,7 @@ export default function Home() {
           <Link className="btn ghost" to="/services">Xem tất cả dịch vụ</Link>
         </div>
         <div className="tool-grid">
-          {POPULAR.map((s) => (
+          {popular.map((s) => (
             <ServiceCard key={s.id} {...s} />
           ))}
         </div>

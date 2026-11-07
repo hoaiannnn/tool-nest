@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const db = require("./config/database");
 const categoryRoutes = require("./routes/category.routes");
 const authRoutes = require("./routes/auth.routes");
+const serviceRoutes = require("./routes/service.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -33,3 +34,5 @@ app.use("/api/auth", authRoutes);
 app.listen(PORT, () => {
     console.log(` Backend đang chạy tại http://localhost:${PORT}`);
 });
+
+app.use("/api/services", serviceRoutes);

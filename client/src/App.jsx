@@ -6,6 +6,9 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { fetchApi } from "./lib/api";
+import Services from "./pages/Services";
+import ServiceDetail from "./pages/ServiceDetail";
+import Tool from "./pages/Tool";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -21,6 +24,9 @@ function App() {
       <Routes>
         <Route element={<MainLayout user={user} setUser={setUser} />}>
             <Route path="/" element={<Home />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/services/:id" element={<ServiceDetail />} />
+            <Route path="/tool/:id" element={<Tool  user={user}/>} />
         </Route>
 
         <Route element={<AuthLayout />}>
