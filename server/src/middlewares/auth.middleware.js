@@ -46,9 +46,25 @@ const requireAdmin = (req, res, next) => {
     next();
 };
 
+const optionalAuth = (req, res, next) => {
+    try {
+        const token = req.cookies?.[COOKIE_NAME];
+        if (token) {
+            req.user = jwt.verify(token, JWT_SECRET);
+        }
+    } catch (error) {
+        return res.status(401).json({
+            success: false,
+            message: "Bạn đã hết token! Nạp tiền đê!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        });
+    }
+    next();
+}
+
 module.exports = {
     COOKIE_NAME,
     sendTokenCookie,
     requireAuth,
     requireAdmin,
+    optionalAuth,
 };
