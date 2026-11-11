@@ -9,14 +9,18 @@ import { fetchApi } from "./lib/api";
 import Services from "./pages/Services";
 import ServiceDetail from "./pages/ServiceDetail";
 import Tool from "./pages/Tool";
+import Profile from "./pages/Profile";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const [user, setUser] = useState(null);
-
+  const [authLoading, setAuthLoading] = useState(true);
+  
   useEffect(() => {
-    fetchApi("/auth/me")
+   fetchApi("/auth/me")
     .then((res) => setUser(res.data))
-    .catch(() => setUser(null));
+    .catch(() => setUser(null))
+    .finally(() => setAuthLoading(false));
   }, []);
 
   return (
@@ -27,6 +31,14 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/services/:id" element={<ServiceDetail />} />
             <Route path="/tool/:id" element={<Tool  user={user}/>} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute user={user} loading={authLoading}>
+                  <Profile user={user} setUser={setUser} />
+                </ProtectedRoute>
+              }
+            />
         </Route>
 
         <Route element={<AuthLayout />}>

@@ -228,7 +228,6 @@ export default function Tool() {
   const isCsv = slug === "csv-to-json";
   const isImageConvert = slug === "image-converter";
   const isImageCompress = slug === "image-compressor";
-  const isDemo = !REAL_SLUGS.includes(slug);
   const baseName = outputName.trim() || "toolnest-ket-qua";
 
   const textPlaceholder =
@@ -484,13 +483,6 @@ export default function Tool() {
             <h2 className="workspace-section-title">
               {isTextTool ? "1. Nhập nội dung đầu vào" : `1. Tải ${category.verb} lên`}
             </h2>
-
-            {ready && isDemo && (
-              <p className="tool-notice">
-                Công cụ này đang ở chế độ minh hoạ: lượt dùng và lịch sử được ghi thật,
-                nhưng nội dung chưa được xử lý thật.
-              </p>
-            )}
 
             {isTextTool ? (
               <div className="ai-box">

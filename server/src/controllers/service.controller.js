@@ -1,4 +1,3 @@
-const { tr } = require("zod/v4/locales");
 const db = require("../config/database");
 
 const CATEGORY_KEY = {
@@ -82,29 +81,26 @@ const useService = async (req, res) => {
     const { inputSummary = "", durationMs = 0 } = req.body || {};
 
     try {
-        const service = await db("services").where({
-            id: serviceId,
-            is_visible: true,
-        });
+        const service = await db("services")
+            .where({ id: serviceId, is_visible: true })
+            .first();
 
         if (!service) {
             return res.status(404).json({
                 success: false,
-                message: "Không tìm thấy dịch vụ"
+                message: "Không tìm thấy dịch vụ",
             });
         }
 
-        if (!service.status !== "ready") {
+        if (service.status !== "ready") {
             return res.status(400).json({
                 success: false,
-                message: "Dịch vụ chưa sẵn sàng"
+                message: "Dịch vụ chưa sẵn sàng",
             });
         }
 
         await db.transaction(async (trx) => {
-            await trx("services").where({
-                id: serviceId,
-            }).increment("usage_count", 1);
+            await trx("services").where({ id: serviceId }).increment("usage_count", 1);
 
             if (req.user) {
                 await trx("usage_logs").insert({
@@ -115,17 +111,17 @@ const useService = async (req, res) => {
                     duration_ms: Math.max(0, Math.round(Number(durationMs) || 0)),
                 });
             }
-
-            res.status(200).json({ success: true, message: "Đã ghi nhận lượt sử dụng" });
         });
+
+        res.status(200).json({ success: true, message: "Đã ghi nhận lượt sử dụng" });
     } catch (error) {
         console.error("Lỗi ghi nhận sử dụng công cụ:", error.message);
         res.status(500).json({
             success: false,
-            message: "Lỗi máy chủ khi nhận lượt sử dụng"
+            message: "Lỗi máy chủ khi nhận lượt sử dụng",
         });
     }
-}
+};
 
 const getMyHistory = async (req, res) => {
     try {

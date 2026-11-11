@@ -47,7 +47,7 @@ export default function Login({setUser}) {
         </Link>
 
         <h1 className="auth__title">Chào mừng trở lại</h1>
-        <p className="auth__sub">Đăng nhập để dùng dịch vụ và xem lịch sử.</p>
+        <p className="auth__sub">Đăng nhập để dùng dịch vụ.</p>
 
         <form className="auth__form" onSubmit={handleSubmit} noValidate>
           <div className="auth-field">

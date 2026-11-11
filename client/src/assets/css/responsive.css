@@ -10,6 +10,14 @@
     .workspace-grid {
         grid-template-columns: 1fr;
     }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+        position: static;
+    }
 }
 
 /* Tablet */
@@ -24,6 +32,10 @@
 
     .home-hero {
         padding-block: 32px 24px;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -51,6 +63,14 @@
     }
 
     .detail-panel {
+        padding: 20px;
+    }
+
+    .profile-form__row {
+        grid-template-columns: 1fr;
+    }
+
+    .panel {
         padding: 20px;
     }
 }

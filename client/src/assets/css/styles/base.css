@@ -1,0 +1,96 @@
+/* ============ Base ============ */
+:root {
+    --color-background: #fbfaff;
+    --color-surface: #ffffff;
+    --color-text: #1d1b2e;
+    --color-text-muted: #625f78;
+    --color-border: #e4e1f2;
+    --color-primary: #6a5bd6;
+    --color-primary-text: #ffffff;
+    --color-primary-light: #eeebff;
+    --color-dark-blue: #0f1b4c;
+    --shadow-card: 0 14px 38px rgba(40, 30, 110, .09);
+    --color-pdf: #6a5bd6;
+    --color-img: #e8590c;
+    --color-vid: #c92a4f;
+    --color-ai: #1f6fcf;
+    --color-file: #1f7a73;
+    --color-success: #1b7f4b;
+    --color-success-bg: #dff5e8;
+    --color-warning: #8a5a00;
+    --color-warning-bg: #fdf0d2;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    scroll-behavior: smooth;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-size: 1.6rem;
+    font-family: "Inter", sans-serif;
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+/* ============ Common ============ */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.container {
+    width: 1330px;
+    max-width: calc(100% - 48px);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1,
+h2,
+h3 {
+    font-family: var(--f-display);
+    line-height: 1.12;
+    margin: 0;
+    text-wrap: balance;
+}
+
+/* ============ Category Colors ============ */
+.color-pdf {
+    --c: var(--color-pdf);
+}
+
+.color-img {
+    --c: var(--color-img);
+}
+
+.color-vid {
+    --c: var(--color-vid);
+}
+
+.color-ai {
+    --c: var(--color-ai);
+}
+
+.color-file {
+    --c: var(--color-file);
+}
+
+h1,
+h2,
+h3 {
+    font-family: var(--font-display);
+    line-height: 1.12;
+    margin: 0;
+    text-wrap: balance;
+}

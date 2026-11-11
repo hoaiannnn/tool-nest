@@ -87,7 +87,6 @@ export default function ServiceDetail() {
                     <h3 className="detail-subheading">Điểm nổi bật</h3>
                     <ul className="detail-list">
                     <li>Miễn phí, không giới hạn số lần dùng.</li>
-                    <li>Lưu lại lịch sử khi bạn đăng nhập.</li>
                     <li>Dùng được trên điện thoại và máy tính.</li>
                     </ul>
                 </div>

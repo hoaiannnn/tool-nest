@@ -9,7 +9,7 @@ const RECENT = ["PDF sang JPG", "Tắt tiếng video", "Nén ảnh"];
 const STEPS = [
   { title: "Chọn công cụ", text: "Tìm theo tên hoặc mở đúng danh mục bạn cần." },
   { title: "Tải tệp lên", text: "Kéo thả tệp vào khung và chọn tuỳ chọn xử lý." },
-  { title: "Tải kết quả về", text: "Nhận tệp đã xử lý. Đăng nhập để xem lại lịch sử sử dụng." },
+  { title: "Tải kết quả về", text: "Nhận tệp đã xử lý." },
 ];
 
 export default function Home() {
@@ -112,7 +112,7 @@ export default function Home() {
         </div>
 
         <div className="home-cta">
-          <h2 className="home-cta__title">Tạo tài khoản để lưu lịch sử dùng công cụ</h2>
+          <h2 className="home-cta__title">Tạo tài khoản ToolNest</h2>
           <p className="home-cta__desc">
             Đăng ký miễn phí. Công cụ bạn dùng gần đây luôn nằm sẵn ở đầu trang.
           </p>
