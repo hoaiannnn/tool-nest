@@ -6,6 +6,8 @@ const db = require("./config/database");
 const categoryRoutes = require("./routes/category.routes");
 const authRoutes = require("./routes/auth.routes");
 const serviceRoutes = require("./routes/service.routes");
+const planRoutes = require("./routes/plan.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,7 +24,7 @@ app.use(cookieParser());
 app.get("/api/health", async (_req, res) => {
     try {
         await db.raw("SELECT 1");
-        res.json({ success: true, message: "Server & SQL Server đang hoạt động tốt!" });
+        res.json({ success: true, message: "Server & SQL Server đang hoạt động!" });
     } catch (error) {
         res.status(500).json({ success: false, message: "Lỗi kết nối SQL Server" });
     }
@@ -30,9 +32,10 @@ app.get("/api/health", async (_req, res) => {
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/services", serviceRoutes);
+app.use("/api/plans", planRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.listen(PORT, () => {
     console.log(` Backend đang chạy tại http://localhost:${PORT}`);
 });
-
-app.use("/api/services", serviceRoutes);

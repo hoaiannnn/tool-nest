@@ -173,3 +173,283 @@
     justify-content: flex-end;
     padding-top: 4px;
 }
+
+/* ============ Plans Page (/plans) ============ */
+.plans-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.billing-toggle {
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    gap: 4px;
+}
+
+.billing-toggle__btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.billing-toggle__btn.is-active {
+    background: var(--color-primary);
+    color: var(--color-primary-text);
+}
+
+.billing-toggle__save {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: stretch;
+    margin-bottom: 42px;
+}
+
+.plan-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-card--featured {
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 12px 30px rgba(106, 91, 214, 0.14);
+}
+
+.plan-card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.plan-card__name {
+    font-size: 22px;
+    margin: 0 0 6px;
+}
+
+.plan-card__desc {
+    margin: 0 0 18px;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    min-height: 42px;
+}
+
+.plan-card__price-box {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.plan-card__price {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.plan-card__period {
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+.plan-card__features {
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    font-size: 14px;
+}
+
+.plan-card__feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.plan-card__check {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.plan-card__btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+}
+
+.plans-faq__title {
+    font-size: 22px;
+    margin: 0 0 16px;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.faq-card__q {
+    font-size: 16px;
+    margin: 0 0 8px;
+}
+
+.faq-card__a {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+/* ============ Checkout Page (/checkout) ============ */
+.checkout-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 20px;
+    align-items: start;
+}
+
+.checkout-plans,
+.payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkout-fields {
+    margin: 18px 0 28px;
+}
+
+.checkout-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-background);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.checkout-option.is-selected {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.checkout-option__title {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 2px;
+}
+
+.checkout-option__sub {
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.checkout-bonus {
+    color: var(--color-primary);
+}
+
+.checkout-total-row {
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--color-border);
+    align-items: center;
+}
+
+.checkout-total-price {
+    font-size: 20px;
+    color: var(--color-primary);
+}
+
+/* ============ NotFound Page (404) ============ */
+.notfound-box {
+    max-width: 560px;
+    margin: 40px auto;
+    text-align: center;
+    padding: 48px 28px;
+}
+
+.notfound-box__code {
+    display: inline-block;
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--color-primary);
+    margin-bottom: 12px;
+}
+
+.notfound-box__title {
+    font-size: 26px;
+    margin: 0 0 8px;
+}
+
+.notfound-box__sub {
+    margin: 0 0 24px;
+    color: var(--color-text-muted);
+}
+
+.notfound-box__actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ============ Biên lai thanh toán ============ */
+.checkout-receipt {
+    max-width: 620px;
+    margin: 0 auto;
+}
+
+.checkout-receipt__head {
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.checkout-receipt__title {
+    margin: 12px 0 6px;
+    font-size: 24px;
+}
+
+.checkout-receipt__meta {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+.checkout-receipt__actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}

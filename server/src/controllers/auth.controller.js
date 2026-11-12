@@ -145,6 +145,14 @@ const getMe = async (req, res) => {
             });
         }
 
+        if (user.status === "locked") {
+            res.clearCookie(COOKIE_NAME, { path: "/" });
+            return res.status(403).json({
+                success: false,
+                message: "Tài khoản của bạn đã bị khoá",
+            });
+        }
+
         res.status(200).json({
             success: true,
             message: "Lấy thông tin thành công",
