@@ -212,3 +212,11 @@
 .btn--danger:hover:not(:disabled) {
     background: #fdecef;
 }
+
+.admin-self-tag {
+    margin-left: 8px;
+}
+
+.table-actions {
+    flex-wrap: wrap;
+}

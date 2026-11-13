@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 const db = require("../config/database");
 
-// Khoá hiển thị ở giao diện <-> slug thật trong bảng categories
+const PLAN_TYPES = ["free", "pro", "team"];
+
 const CATEGORY_SLUG = {
     pdf: "pdf",
     img: "image",
@@ -177,6 +178,96 @@ const toggleUserStatus = async (req, res) => {
         });
     } catch (error) {
         fail(res, error, "Lỗi cập nhật trạng thái người dùng");
+    }
+};
+
+const updateUser = async (req, res) => {
+    try {
+        const userId = Number(req.params.id);
+        const target = await db("users").where({ id: userId }).first();
+
+        if (!target) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy người dùng" });
+        }
+        if (target.role !== "user") {
+            return res.status(403).json({ success: false, message: "Chỉ sửa được tài khoản người dùng thường" });
+        }
+
+        const { fullName, phone, planType, credits } = req.body || {};
+        const data = {};
+
+        if (fullName !== undefined) {
+            if (String(fullName).trim().length < 2) {
+                return res.status(400).json({ success: false, message: "Họ tên phải từ 2 ký tự trở lên" });
+            }
+            data.full_name = String(fullName).trim();
+        }
+        if (phone !== undefined) {
+            data.phone = String(phone).trim() || null;
+        }
+        if (planType !== undefined) {
+            if (!PLAN_TYPES.includes(planType)) {
+                return res.status(400).json({ success: false, message: "Gói dịch vụ không hợp lệ" });
+            }
+            data.plan_type = planType;
+            if (planType === "free") data.plan_expires_at = null;
+        }
+        if (credits !== undefined) {
+            const value = Number(credits);
+            if (!Number.isInteger(value) || value < 0) {
+                return res.status(400).json({ success: false, message: "Credits phải là số nguyên không âm" });
+            }
+            data.credits = value;
+        }
+
+        if (!Object.keys(data).length) {
+            return res.status(400).json({ success: false, message: "Không có thông tin nào để cập nhật" });
+        }
+        data.updated_at = db.fn.now();
+
+        await db("users").where({ id: userId }).update(data);
+        res.status(200).json({ success: true, message: "Đã cập nhật thông tin người dùng" });
+    } catch (error) {
+        fail(res, error, "Lỗi cập nhật thông tin người dùng");
+    }
+};
+
+const changeUserRole = async (req, res) => {
+    try {
+        const userId = Number(req.params.id);
+        const { role } = req.body || {};
+
+        if (!["admin", "user"].includes(role)) {
+            return res.status(400).json({ success: false, message: "Quyền không hợp lệ" });
+        }
+        if (userId === req.user.id) {
+            return res.status(403).json({ success: false, message: "Không thể tự đổi quyền của chính mình" });
+        }
+
+        const target = await db("users").where({ id: userId }).first();
+        if (!target) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy tài khoản" });
+        }
+        if (target.role === role) {
+            return res.status(400).json({ success: false, message: "Tài khoản đã ở quyền này" });
+        }
+        if (role === "admin" && target.status === "locked") {
+            return res.status(400).json({ success: false, message: "Hãy mở khoá tài khoản trước khi cấp quyền admin" });
+        }
+        if (role === "user") {
+            const [{ total }] = await db("users").where({ role: "admin" }).count({ total: "*" });
+            if (Number(total) <= 1) {
+                return res.status(409).json({ success: false, message: "Hệ thống phải còn ít nhất một quản trị viên" });
+            }
+        }
+
+        await db("users").where({ id: userId }).update({ role, updated_at: db.fn.now() });
+        res.status(200).json({
+            success: true,
+            message: role === "admin" ? "Đã cấp quyền quản trị viên" : "Đã hạ xuống người dùng thường",
+        });
+    } catch (error) {
+        fail(res, error, "Lỗi đổi quyền tài khoản");
     }
 };
 
@@ -415,4 +506,6 @@ module.exports = {
     deleteService,
     getAdmins,
     createAdmin,
+    updateUser,
+    changeUserRole
 };

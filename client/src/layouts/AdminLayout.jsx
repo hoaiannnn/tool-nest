@@ -66,7 +66,7 @@ export default function AdminLayout({ user, setUser, loading }) {
 
             <main className="admin-main">
                 <div className="admin-container">
-                    <Outlet />
+                   <Outlet context={{ user }} />
                 </div>
             </main>
         </div>

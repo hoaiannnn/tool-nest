@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { fetchApi } from "../../lib/api";
 import { formatDateTime } from "../../lib/format";
 
 const EMPTY_FORM = { fullName: "", email: "", password: "", phone: "" };
 
 export default function AdminAdmins() {
+    const { user: me } = useOutletContext();
+
     const [admins, setAdmins] = useState(null);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
     const [form, setForm] = useState(EMPTY_FORM);
     const [saving, setSaving] = useState(false);
+    const [busyId, setBusyId] = useState(null);
 
     const load = useCallback(() => {
         return fetchApi("/admin/admins")
@@ -50,12 +54,32 @@ export default function AdminAdmins() {
         }
     }
 
+    async function handleDemote(admin) {
+        if (!window.confirm(`Hạ ${admin.email} xuống người dùng thường?`)) return;
+
+        setError("");
+        setNotice("");
+        setBusyId(admin.id);
+        try {
+            const res = await fetchApi(`/admin/users/${admin.id}/role`, {
+                method: "PATCH",
+                body: JSON.stringify({ role: "user" }),
+            });
+            setNotice(`${res.message}: ${admin.email}`);
+            await load();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setBusyId(null);
+        }
+    }
+
     return (
         <>
             <div className="admin-header">
                 <div>
                     <h1 className="admin-header__title">Quản trị viên</h1>
-                    <p className="admin-header__sub">Danh sách và tạo mới tài khoản có quyền quản trị.</p>
+                    <p className="admin-header__sub">Danh sách, tạo mới và hạ quyền tài khoản quản trị.</p>
                 </div>
             </div>
 
@@ -114,6 +138,7 @@ export default function AdminAdmins() {
                                     <th>Điện thoại</th>
                                     <th>Ngày tạo</th>
                                     <th>Trạng thái</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -121,6 +146,7 @@ export default function AdminAdmins() {
                                     <tr key={a.id}>
                                         <td>
                                             <b className="data-table__strong">{a.fullName}</b>
+                                            {a.id === me.id && <span className="status-tag neutral admin-self-tag">Bạn</span>}
                                             <div className="data-table__muted">{a.email}</div>
                                         </td>
                                         <td className="data-table__muted">{a.phone || "-"}</td>
@@ -129,6 +155,20 @@ export default function AdminAdmins() {
                                             <span className={`status-tag ${a.status === "locked" ? "coming-soon" : "success"}`}>
                                                 {a.status === "locked" ? "Đã khoá" : "Hoạt động"}
                                             </span>
+                                        </td>
+                                        <td>
+                                            {a.id === me.id ? (
+                                                <span className="data-table__muted">-</span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className="btn ghost btn--sm btn--danger"
+                                                    disabled={busyId === a.id}
+                                                    onClick={() => handleDemote(a)}
+                                                >
+                                                    Hạ quyền
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

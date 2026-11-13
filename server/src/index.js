@@ -12,12 +12,9 @@ const adminRoutes = require("./routes/admin.routes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(
-    cors({
-        origin: ["http://localhost:5174", "http://localhost:5173"],
-        credentials: true,
-    })
-);
+const origins = (process.env.CLIENT_ORIGIN || "http://localhost:5173,http://localhost:5174").split(",");
+app.use(cors({ origin: origins, credentials: true }));
+
 app.use(express.json());
 app.use(cookieParser());
 

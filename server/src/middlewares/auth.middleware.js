@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const db = require("../config/database");
 
 const JWT_SECRET = process.env.JWT_SECRET || "toolnest_super_secret_key_2026";
 const COOKIE_NAME = "toolnest_token";
@@ -36,14 +37,21 @@ const requireAuth = (req, res, next) => {
     }
 };
 
-const requireAdmin = (req, res, next) => {
-    if (!req.user || req.user.role !== "admin") {
-        return res.status(403).json({
-            success: false,
-            message: "Chỉ Quản trị viên mới có quyền thực hiện thao tác này",
-        });
+const requireAdmin = async (req, res, next) => {
+    try {
+        const current = await db("users").where({ id: req.user?.id }).select("role", "status").first();
+
+        if (!current || current.role !== "admin" || current.status === "locked") {
+            return res.status(403).json({
+                success: false,
+                message: "Chỉ Quản trị viên mới có quyền thực hiện thao tác này",
+            });
+        }
+        next();
+    } catch (error) {
+        console.error("Lỗi kiểm tra quyền admin:", error.message);
+        return res.status(500).json({ success: false, message: "Lỗi máy chủ" });
     }
-    next();
 };
 
 const optionalAuth = (req, res, next) => {

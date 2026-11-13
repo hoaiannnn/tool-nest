@@ -34,7 +34,7 @@ export default function Header({ user, setUser}) {
         <header className="header">
         <div className="container">
             <Link className="logo" to="/">
-                <img className="logo__img" src="/src/assets/image/logo-img.png" alt=""/>
+                <img className="logo__img" src={logoImg} alt="ToolNest" />
                 ToolNest
             </Link>
 

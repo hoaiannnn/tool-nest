@@ -2,16 +2,49 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: toolnest-sqlserver
-    restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: ${DB_PASSWORD}
-      MSSQL_PID: "Developer"
-      MSSQL_COLLATION: "Vietnamese_CI_AI"
+      MSSQL_COLLATION: Vietnamese_CI_AI
     ports:
-      - "1433:1433"
+      - "14330:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  server:
+    build: ./server
+    container_name: toolnest-server
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      PORT: 5000
+      DB_HOST: sqlserver
+      DB_PORT: 1433
+      DB_USER: sa
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ToolNestDB
+      JWT_SECRET: ${JWT_SECRET}
+      CLIENT_ORIGIN: http://localhost:5173
+    ports:
+      - "5000:5000"
+
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: http://localhost:5000/api
+    container_name: toolnest-client
+    depends_on:
+      - server
+    ports:
+      - "5173:80"
 
 volumes:
   sqlserver_data:

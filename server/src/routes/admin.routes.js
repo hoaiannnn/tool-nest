@@ -10,6 +10,8 @@ const {
     deleteService,
     getAdmins,
     createAdmin,
+    updateUser,
+    changeUserRole
 } = require("../controllers/admin.controller");
 const { requireAuth, requireAdmin } = require("../middlewares/auth.middleware");
 
@@ -20,6 +22,8 @@ router.use(requireAuth, requireAdmin);
 router.get("/overview", getOverview);
 router.get("/users", getUsers);
 router.patch("/users/:id/toggle-status", toggleUserStatus);
+router.put("/users/:id", updateUser);
+router.patch("/users/:id/role", changeUserRole);
 router.get("/activity", getActivity);
 
 router.get("/services", getAdminServices);
