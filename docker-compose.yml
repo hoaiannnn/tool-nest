@@ -20,6 +20,8 @@ services:
   server:
     build: ./server
     container_name: toolnest-server
+    env_file:
+      - ./server/.env
     depends_on:
       sqlserver:
         condition: service_healthy

@@ -424,7 +424,6 @@
     flex-wrap: wrap;
 }
 
-/* ============ Biên lai thanh toán ============ */
 .checkout-receipt {
     max-width: 620px;
     margin: 0 auto;
@@ -452,4 +451,10 @@
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 20px;
+}
+
+.auth__forgot {
+    text-align: right;
+    margin: -4px 0 12px;
+    font-size: 14px;
 }

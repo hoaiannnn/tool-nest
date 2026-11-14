@@ -19,6 +19,8 @@ import AdminServices from "./pages/admin/AdminServices";
 import AdminActivity from "./pages/admin/AdminActivity";
 import AdminAdmins from "./pages/admin/AdminAdmins";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ForgotPassword from "./pages/ForgotPassword"
+import ResetPassword from "./pages/ResetPassword"
 import { fetchApi } from "./lib/api";
 
 function App() {
@@ -62,6 +64,8 @@ function App() {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/register" element={<Register setUser={setUser} />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
 
       <Route

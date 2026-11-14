@@ -8,6 +8,7 @@ const {
     updateProfile,
     changePassword,
 } = require("../controllers/auth.controller");
+const { forgotPassword, resetPassword } = require("../controllers/passwordReset.controller");
 const { requireAuth } = require("../middlewares/auth.middleware");
 
 const router = Router();
@@ -24,6 +25,8 @@ const authLimiter = rateLimit({
 router.post("/register", authLimiter, register);
 router.post("/login", authLimiter, login);
 router.post("/logout", logout);
+router.post("/forgot-password", authLimiter, forgotPassword);
+router.post("/reset-password", authLimiter, resetPassword);
 router.get("/me", requireAuth, getMe);
 router.put("/profile", requireAuth, updateProfile);
 router.put("/change-password", requireAuth, changePassword);

@@ -86,6 +86,10 @@ export default function Login({setUser}) {
             </div>
           </div>
 
+          <div className="auth__forgot">
+            <Link className="auth__switch-link" to="/forgot-password">Quên mật khẩu?</Link>
+          </div>
+
           {error && <p className="form-error">{error}</p>}
 
           <button className="btn auth__submit" type="submit" disabled={loading}>
