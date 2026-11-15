@@ -100,4 +100,4 @@ const checkoutPlan = async (req, res) => {
     }
 };
 
-module.exports = { checkoutPlan };
+module.exports = { checkoutPlan, PLANS };

@@ -19,8 +19,9 @@ import AdminServices from "./pages/admin/AdminServices";
 import AdminActivity from "./pages/admin/AdminActivity";
 import AdminAdmins from "./pages/admin/AdminAdmins";
 import ProtectedRoute from "./components/ProtectedRoute";
-import ForgotPassword from "./pages/ForgotPassword"
-import ResetPassword from "./pages/ResetPassword"
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import PaypalReturn from "./pages/PaypalReturn";
 import { fetchApi } from "./lib/api";
 
 function App() {
@@ -59,6 +60,14 @@ function App() {
           }
         />
         <Route path="*" element={<NotFound />} />
+        <Route
+          path="/payment/paypal-return"
+          element={
+            <ProtectedRoute user={user} loading={authLoading}>
+              <PaypalReturn setUser={setUser} />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       <Route element={<AuthLayout />}>
