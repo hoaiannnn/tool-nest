@@ -18,6 +18,7 @@ const REAL_SLUGS = [
   "split-pdf",
   "csv-to-json",
 ];
+
 const IMAGE_MIME = { webp: "image/webp", jpg: "image/jpeg", png: "image/png" };
 const COMPRESS_QUALITY = { light: 0.9, balanced: 0.75, high: 0.5 };
 const ACCEPT_CHECK = {
@@ -165,7 +166,7 @@ function parseCsv(text) {
   return rows.filter((r) => r.some((c) => c.trim() !== ""));
 }
 
-export default function Tool() {
+export default function Tool({ user, setUser }) {
   const { id } = useParams();
   const services = useServices();
 
@@ -390,22 +391,39 @@ export default function Tool() {
       if (isMerge && files.length < 2) return setError("Gộp PDF cần ít nhất 2 tệp.");
     }
 
+    if (credit > 0 && !user) {
+      return setError("Công cụ này tốn Credits, vui lòng đăng nhập để sử dụng.");
+    }
+
+    const inputSummary = isTextTool
+      ? textInput.trim().slice(0, 100)
+      : files.map((f) => f.name).join(", ");
+
     setProcessing(true);
     setProgress(10);
     const timer = setInterval(() => setProgress((p) => (p < 85 ? p + 15 : p)), 200);
     const startedAt = Date.now();
 
     try {
+      if (credit > 0) {
+        const charged = await fetchApi(`/services/${service.id}/use`, {
+          method: "POST",
+          body: JSON.stringify({ inputSummary, durationMs: 0 }),
+        });
+        if (charged.data?.credits != null && setUser) {
+          setUser((u) => (u ? { ...u, credits: charged.data.credits } : u));
+        }
+      }
+
       const [out] = await Promise.all([runTool(), sleep(700)]);
       setResult(out);
 
-      const inputSummary = isTextTool
-        ? textInput.trim().slice(0, 100)
-        : files.map((f) => f.name).join(", ");
-      fetchApi(`/services/${service.id}/use`, {
-        method: "POST",
-        body: JSON.stringify({ inputSummary, durationMs: Date.now() - startedAt }),
-      }).catch(() => {});
+      if (credit === 0) {
+        fetchApi(`/services/${service.id}/use`, {
+          method: "POST",
+          body: JSON.stringify({ inputSummary, durationMs: Date.now() - startedAt }),
+        }).catch(() => {});
+      }
     } catch (err) {
       setError(err.message || "Xử lý thất bại, vui lòng thử lại.");
     } finally {

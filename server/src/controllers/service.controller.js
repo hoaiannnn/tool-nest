@@ -86,20 +86,39 @@ const useService = async (req, res) => {
             .first();
 
         if (!service) {
-            return res.status(404).json({
+            return res.status(404).json({ success: false, message: "Không tìm thấy dịch vụ" });
+        }
+        if (service.status !== "ready") {
+            return res.status(400).json({ success: false, message: "Dịch vụ chưa sẵn sàng" });
+        }
+
+        const cost = Number(service.credit_cost) || 0;
+
+        if (cost > 0 && !req.user) {
+            return res.status(401).json({
                 success: false,
-                message: "Không tìm thấy dịch vụ",
+                message: "Công cụ này tốn Credits, vui lòng đăng nhập.",
             });
         }
 
-        if (service.status !== "ready") {
-            return res.status(400).json({
-                success: false,
-                message: "Dịch vụ chưa sẵn sàng",
-            });
-        }
+        let remainingCredits = null;
 
         await db.transaction(async (trx) => {
+            if (cost > 0) {
+                const changed = await trx("users")
+                    .where({ id: req.user.id })
+                    .andWhere("credits", ">=", cost)
+                    .update({ credits: trx.raw("credits - ?", [cost]) });
+
+                if (!changed) {
+                    const err = new Error("Bạn không đủ Credits. Hãy nâng cấp gói để tiếp tục.");
+                    err.status = 402;
+                    throw err;
+                }
+                const u = await trx("users").where({ id: req.user.id }).first();
+                remainingCredits = u.credits;
+            }
+
             await trx("services").where({ id: serviceId }).increment("usage_count", 1);
 
             if (req.user) {
@@ -113,13 +132,17 @@ const useService = async (req, res) => {
             }
         });
 
-        res.status(200).json({ success: true, message: "Đã ghi nhận lượt sử dụng" });
-    } catch (error) {
-        console.error("Lỗi ghi nhận sử dụng công cụ:", error.message);
-        res.status(500).json({
-            success: false,
-            message: "Lỗi máy chủ khi nhận lượt sử dụng",
+        return res.status(200).json({
+            success: true,
+            message: "Đã ghi nhận lượt sử dụng",
+            data: { credits: remainingCredits },
         });
+    } catch (error) {
+        if (error.status) {
+            return res.status(error.status).json({ success: false, message: error.message });
+        }
+        console.error("Lỗi ghi nhận sử dụng công cụ:", error.message);
+        return res.status(500).json({ success: false, message: "Lỗi máy chủ khi nhận lượt sử dụng" });
     }
 };
 

@@ -44,7 +44,6 @@ export async function seed(knex: Knex): Promise<void> {
     { category_id: catMap["file-tools"], slug: "hash-generator", name: "Tạo mã băm MD5 / SHA-256", short_desc: "Kiểm tra tính toàn vẹn của tệp hoặc chuỗi văn bản bằng thuật toán băm chuẩn.", status: "ready", is_visible: true, credit_cost: 0, usage_count: 160 },
   ]);
 
-  //  Tạo tài khoản Admin và User mẫu (Mật khẩu chung: 12345678)
   const passwordHash = await bcrypt.hash("12345678", 10);
 
   await knex("users").insert([
@@ -59,7 +58,7 @@ export async function seed(knex: Knex): Promise<void> {
       status: "active",
       is_email_verified: true,
       credits: 999,
-      plan_type: "premium",
+      plan_type: "team",
     },
     {
       email: "user@toolnest.vn",

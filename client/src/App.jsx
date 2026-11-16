@@ -41,7 +41,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/services" element={<Services />} />
         <Route path="/services/:id" element={<ServiceDetail />} />
-        <Route path="/tool/:id" element={<Tool user={user} />} />
+        <Route path="/tool/:id" element={<Tool user={user} setUser={setUser} />} />
         <Route
           path="/profile"
           element={
