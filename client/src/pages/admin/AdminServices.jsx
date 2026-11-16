@@ -4,6 +4,7 @@ import { fetchApi } from "../../lib/api";
 import { normalize } from "../../lib/format";
 import { usePagination } from "../../lib/usePagination";
 import Pager from "../../components/Pager";
+import AdminFormDialog from "../../components/AdminFormDialog";
 
 const PAGE_SIZE = 10;
 const EMPTY_FORM = { name: "", category: "pdf", desc: "", status: "ready", creditCost: 0, visible: true };
@@ -64,6 +65,7 @@ export default function AdminServices() {
     function closeForm() {
         setShowForm(false);
         setEditingId(null);
+        setError("");
     }
 
     async function handleSubmit(e) {
@@ -138,14 +140,16 @@ export default function AdminServices() {
                 </button>
             </div>
 
-            {error && <p className="form-error">{error}</p>}
+            {!showForm && error && <p className="form-error" role="alert">{error}</p>}
             {notice && <p className="form-success admin-section">{notice}</p>}
 
             {showForm && (
-                <div className="panel admin-section">
-                    <div className="admin-panel-head">
-                        <h2 className="admin-panel-title">{editingId ? "Sửa dịch vụ" : "Thêm dịch vụ mới"}</h2>
-                    </div>
+                <AdminFormDialog
+                    title={editingId ? "Sửa dịch vụ" : "Thêm dịch vụ mới"}
+                    error={error}
+                    saving={saving}
+                    onClose={closeForm}
+                >
 
                     <form className="profile-form" onSubmit={handleSubmit}>
                         <div className="profile-form__row">
@@ -193,13 +197,15 @@ export default function AdminServices() {
                         </label>
 
                         <div className="profile-form__actions">
-                            <button type="button" className="btn ghost" onClick={closeForm}>Huỷ</button>
+                            <button type="button" className="btn ghost" onClick={closeForm} disabled={saving}>
+                                Huỷ
+                            </button>
                             <button type="submit" className="btn" disabled={saving}>
                                 {saving ? "Đang lưu..." : editingId ? "Lưu thay đổi" : "Thêm dịch vụ"}
                             </button>
                         </div>
                     </form>
-                </div>
+                </AdminFormDialog>
             )}
 
             <div className="toolbar">

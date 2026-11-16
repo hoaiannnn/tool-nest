@@ -50,6 +50,18 @@
 
 /* Tablet */
 @media screen and (min-width: 768px) and (max-width: 991.98px) {
+    .admin-form-dialog {
+        width: calc(100% - 1rem);
+        max-height: calc(100dvh - 1rem);
+        padding: 1rem;
+    }
+
+    .admin-form-dialog .profile-form__row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.65rem;
+    }
+
     .category-grid {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -104,5 +116,23 @@
 
     .kpi-grid {
         grid-template-columns: 1fr;
+    }
+
+    .admin-form-dialog {
+        padding: 0.75rem;
+    }
+
+    .admin-form-dialog__head {
+        margin-bottom: 0.5rem;
+    }
+
+    .admin-form-dialog .profile-form__row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem;
+    }
+
+    .admin-form-dialog .profile-form {
+        gap: 0.5rem;
     }
 }

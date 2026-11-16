@@ -3,6 +3,7 @@ import { fetchApi } from "../../lib/api";
 import { formatDateTime, normalize } from "../../lib/format";
 import { usePagination } from "../../lib/usePagination";
 import Pager from "../../components/Pager";
+import AdminFormDialog from "../../components/AdminFormDialog";
 
 const PAGE_SIZE = 10;
 const PLAN_LABEL = { free: "Free", pro: "Pro", team: "Team" };
@@ -42,6 +43,11 @@ export default function AdminUsers() {
     function resetMessages() {
         setError("");
         setNotice("");
+    }
+
+    function closeEdit() {
+        setEditing(null);
+        setError("");
     }
 
     function openEdit(user) {
@@ -142,14 +148,16 @@ export default function AdminUsers() {
                 </div>
             </div>
 
-            {error && <p className="form-error">{error}</p>}
+            {!editing && error && <p className="form-error" role="alert">{error}</p>}
             {notice && <p className="form-success admin-section">{notice}</p>}
 
             {editing && (
-                <div className="panel admin-section">
-                    <div className="admin-panel-head">
-                        <h2 className="admin-panel-title">Sửa thông tin: {editing.email}</h2>
-                    </div>
+                <AdminFormDialog
+                    title={`Sửa thông tin: ${editing.email}`}
+                    error={error}
+                    saving={saving}
+                    onClose={closeEdit}
+                >
 
                     <form className="profile-form" onSubmit={handleSave}>
                         <div className="profile-form__row">
@@ -183,13 +191,16 @@ export default function AdminUsers() {
                         </div>
 
                         <div className="profile-form__actions">
-                            <button type="button" className="btn ghost" onClick={() => setEditing(null)}>Huỷ</button>
+                            <button type="button" className="btn ghost" onClick={closeEdit} disabled={saving}>
+                                Huỷ
+                            </button>   
                             <button type="submit" className="btn" disabled={saving}>
                                 {saving ? "Đang lưu..." : "Lưu thay đổi"}
                             </button>
                         </div>
-                    </form>
-                </div>
+                    </form> 
+
+                </AdminFormDialog>  
             )}
 
             <div className="toolbar">
