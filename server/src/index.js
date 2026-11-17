@@ -8,8 +8,10 @@ const authRoutes = require("./routes/auth.routes");
 const serviceRoutes = require("./routes/service.routes");
 const planRoutes = require("./routes/plan.routes");
 const adminRoutes = require("./routes/admin.routes");
+const helmet = require("helmet");
 
 const app = express();
+app.use(helmet());
 const PORT = process.env.PORT || 5000;
 
 const origins = (process.env.CLIENT_ORIGIN || "http://localhost:5173,http://localhost:5174").split(",");

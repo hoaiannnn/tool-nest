@@ -1,107 +1,114 @@
-# Đặc tả API (API Specification) — Dự án ToolNest
+# Đặc tả API — ToolNest
 
-## 1. Cấu trúc JSON trả về chuẩn (Response Envelope)
+Tài liệu mô tả các API **đã được cài đặt** trong `server/src`. Tất cả đường dẫn bắt đầu bằng `/api`.
 
-### Thành công (200 OK, 201 Created):
+## 1. Quy ước chung
 
-```json
-{
-  "success": true,
-  "message": "Thao tác thành công",
-  "data": { ... },
-  "meta": {
-    "page": 1,
-    "limit": 9,
-    "totalItems": 15,
-    "totalPages": 2
-  }
-}
-```
+**Xác thực:** JWT lưu trong cookie `toolnest_token` (httpOnly, sameSite=lax, hạn 7 ngày). Client gọi với `credentials: "include"`.
 
-(Ghi chú: meta chỉ có ở các API lấy danh sách có phân trang).
+**Phân quyền (3 mức):**
 
-### Thất bại (400, 401, 403, 404, 409, 429, 500):
+- **Public**: không cần đăng nhập.
+- **Auth**: cần đăng nhập (`requireAuth`; kiểm tra lại tài khoản còn tồn tại và không bị khóa).
+- **Admin**: cần đăng nhập và có role `admin` (`requireAdmin`; kiểm tra role và status trong CSDL ở mỗi request).
+
+**Định dạng phản hồi**
+
+Thành công:
 
 ```json
-{
-  "success": false,
-  "message": "Dữ liệu đầu vào không hợp lệ",
-  "errors": {
-    "email": "Email không đúng định dạng"
-  }
-}
+{ "success": true, "message": "Thao tác thành công", "data": {} }
 ```
 
-## 2. Quy chuẩn Query String cho MỌI danh sách (Đáp ứng yêu cầu bắt buộc)
+Thất bại:
 
-Tất cả các API lấy danh sách đều dùng chung chuẩn tham số trên URL để dễ dàng viết 1 hàm xử lý dùng chung cho cả Knex.js (Backend) và Custom Hook (Frontend):
+```json
+{ "success": false, "message": "Mô tả lỗi" }
+```
 
-- `page`: Trang hiện tại (mặc định 1)
-- `limit`: Số dòng mỗi trang (mặc định 9 cho trang dịch vụ user, 10 cho các bảng quản trị/lịch sử)
-- `search`: Từ khóa tìm kiếm tiếng Việt có dấu hoặc không dấu (kết hợp COLLATE Vietnamese_CI_AI)
-- `sortBy`: Cột cần sắp xếp (ví dụ: created_at, usage_count, name, credit_cost)
-- `sortOrder`: Thứ tự sắp xếp (asc hoặc desc, mặc định desc)
+**Mã trạng thái thường gặp:** 200, 201, 400 (dữ liệu không hợp lệ), 401 (chưa đăng nhập / hết phiên), 402 (không đủ Credits), 403 (bị khóa / không đủ quyền), 404, 409 (trùng dữ liệu), 429 (thử quá nhiều lần), 500.
 
-Các tham số lọc (filter) riêng theo từng bảng:
+**Danh sách, tìm kiếm và phân trang:** các API danh sách trả về toàn bộ dữ liệu của trang tương ứng. Việc **tìm kiếm, lọc, sắp xếp và phân trang được thực hiện ở client** (hook `usePagination`).
 
-- `category`
-- `status`
-- `isVisible`
-- `planType`
-- ...
+**Giới hạn số lần gọi (rate limit):** `register`, `login`, `forgot-password`, `reset-password` tối đa 10 lần / 5 phút / địa chỉ IP.
 
-## 3. Danh sách toàn bộ Endpoints theo từng Phân hệ
+## 2. Xác thực và tài khoản — `/api/auth`
 
-### A. Xác thực & Tài khoản
+| Method | Endpoint              | Quyền  | Mô tả                                                                                                                       |
+| ------ | --------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
+| POST   | /auth/register        | Public | Đăng ký (`email`, `password` ≥ 8 ký tự, `fullName`, `birthYear`, `phone`, `address`); tặng 10 Credits; gắn cookie đăng nhập |
+| POST   | /auth/login           | Public | Đăng nhập (`email`, `password`); tài khoản bị khóa trả 403                                                                  |
+| POST   | /auth/logout          | Public | Xóa cookie đăng nhập                                                                                                        |
+| GET    | /auth/me              | Auth   | Thông tin người dùng hiện tại                                                                                               |
+| PUT    | /auth/profile         | Auth   | Cập nhật hồ sơ (`fullName`, `birthYear`, `phone`, `address`)                                                                |
+| PUT    | /auth/change-password | Auth   | Đổi mật khẩu (`currentPassword`, `newPassword`)                                                                             |
+| POST   | /auth/forgot-password | Public | Gửi email đặt lại mật khẩu (`email`); luôn trả cùng một thông báo dù email có tồn tại hay không                             |
+| POST   | /auth/reset-password  | Public | Đặt mật khẩu mới (`token`, `password` ≥ 8 ký tự)                                                                            |
 
-| Method | Endpoint                  | Quyền  | Mô tả                                                 |
-| ------ | ------------------------- | ------ | ----------------------------------------------------- |
-| POST   | /api/auth/register        | Public | Đăng ký tài khoản mới + gửi email xác thực            |
-| POST   | /api/auth/login           | Public | Đăng nhập (Email/Pass) -> Gắn JWT vào httpOnly cookie |
-| POST   | /api/auth/google          | Public | Đăng nhập/Liên kết tài khoản qua Google OAuth         |
-| POST   | /api/auth/logout          | Auth   | Đăng xuất (Xóa cookie JWT)                            |
-| GET    | /api/auth/me              | Auth   | Lấy thông tin user đang đăng nhập                     |
-| GET    | /api/auth/verify-email    | Public | Xác thực email qua token trong link                   |
-| POST   | /api/auth/forgot-password | Public | Yêu cầu gửi email đặt lại mật khẩu                    |
-| POST   | /api/auth/reset-password  | Public | Đặt lại mật khẩu mới bằng token                       |
-| PUT    | /api/profile              | Auth   | Cập nhật hồ sơ (họ tên, năm sinh, địa chỉ, sđt)       |
-| PUT    | /api/profile/password     | Auth   | Đổi mật khẩu (yêu cầu nhập mật khẩu hiện tại)         |
+**Cơ chế quên mật khẩu:** token ngẫu nhiên 32 byte; CSDL (bảng `password_resets`) chỉ lưu bản băm SHA-256; hạn 30 phút; dùng một lần (`used_at`); token cũ bị vô hiệu khi tạo token mới; đổi mật khẩu và đánh dấu đã dùng trong cùng một transaction.
 
-### B. Dịch vụ & Sử dụng công cụ
+## 3. Danh mục và dịch vụ
 
-| Method | Endpoint                 | Quyền  | Mô tả                                                                                                                 |
-| ------ | ------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------- |
-| GET    | /api/categories          | Public | Lấy 5 danh mục (PDF, Ảnh, Video, AI viết, Tệp)                                                                        |
-| GET    | /api/services            | Public | Danh sách dịch vụ (chỉ lấy is_visible = 1, có Phân trang, Tìm kiếm, Lọc theo category/status, Sắp xếp)                |
-| GET    | /api/services/:slug      | Public | Chi tiết 1 dịch vụ theo slug                                                                                          |
-| POST   | /api/tools/:slug/execute | Auth   | Chạy công cụ (Upload file/text -> kiểm tra & trừ credit -> trả kết quả -> ghi usage_logs)                             |
-| GET    | /api/history             | Auth   | Lịch sử sử dụng của chính user đó (Phân trang, Tìm kiếm theo tên công cụ/file, Lọc theo danh mục/trạng thái, Sắp xếp) |
+| Method | Endpoint          | Quyền         | Mô tả                                                            |
+| ------ | ----------------- | ------------- | ---------------------------------------------------------------- |
+| GET    | /categories       | Public        | Danh sách danh mục (PDF, Ảnh, Video, AI viết, Tệp)               |
+| GET    | /services         | Public        | Danh sách dịch vụ đang hiển thị (`is_visible = 1`)               |
+| GET    | /services/:id     | Public        | Chi tiết một dịch vụ                                             |
+| POST   | /services/:id/use | Public / Auth | Ghi nhận một lượt sử dụng công cụ (`inputSummary`, `durationMs`) |
 
-### C. Thanh toán Online
+**Quy tắc `POST /services/:id/use`:**
 
-| Method | Endpoint                   | Quyền  | Mô tả                                                                                                      |
-| ------ | -------------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
-| GET    | /api/payments/packages     | Public | Danh sách gói nạp Credit / nâng cấp Premium                                                                |
-| POST   | /api/payments/create-url   | Auth   | Tạo đơn pending trong DB và sinh URL thanh toán Sandbox                                                    |
-| GET    | /api/payments/vnpay-return | Public | Xử lý kết quả trả về trình duyệt                                                                           |
-| GET    | /api/payments/vnpay-ipn    | Public | Webhook/IPN: Xác minh chữ ký HMAC -> mở SQL Transaction cộng Credit/nâng cấp Premium -> gửi email biên lai |
+- Dịch vụ phải tồn tại, đang hiển thị và có `status = ready`.
+- Công cụ miễn phí (`credit_cost = 0`): khách vẫn dùng được; người đã đăng nhập thì được ghi `usage_logs`.
+- Công cụ có phí (`credit_cost > 0`): **bắt buộc đăng nhập**; máy chủ trừ Credits **có điều kiện** (`credits >= credit_cost`) trong một transaction cùng với việc tăng `usage_count` và ghi `usage_logs`. Không đủ Credits trả 402. Phản hồi trả về `data.credits` là số dư còn lại.
+- Lịch sử sử dụng **không** mở cho người dùng; chỉ quản trị viên xem được (xem mục 5).
 
-### D. Quản trị viên
+## 4. Thanh toán — `/api/plans` (PayPal Sandbox)
 
-(Tất cả đều đi qua middleware requireAuth và requireRole('admin'). Mọi API GET danh sách đều bắt buộc có Phân trang, Tìm kiếm, Sắp xếp, Lọc)
+| Method | Endpoint                   | Quyền | Mô tả                                                                                                           |
+| ------ | -------------------------- | ----- | --------------------------------------------------------------------------------------------------------------- |
+| POST   | /plans/paypal/create-order | Auth  | Tạo đơn `pending` và đơn PayPal (`planId`: pro/team, `cycle`: monthly/yearly); trả `approveUrl` để chuyển hướng |
+| POST   | /plans/paypal/capture      | Auth  | Chốt đơn sau khi người dùng đồng ý trên PayPal (`orderId`); trả `user` và `receipt`                             |
 
-| Method | Endpoint                           | Mô tả                                                                                               |
-| ------ | ---------------------------------- | --------------------------------------------------------------------------------------------------- |
-| GET    | /api/admin/stats                   | Thống kê tổng quan (tổng lượt dùng theo danh mục, top dịch vụ dùng nhiều nhất, tổng user/doanh thu) |
-| GET    | /api/admin/users                   | Danh sách người dùng (role = 'user')                                                                |
-| PUT    | /api/admin/users/:id               | Sửa thông tin user / Khóa hoặc mở khóa tài khoản (status)                                           |
-| DELETE | /api/admin/users/:id               | Xóa tài khoản người dùng                                                                            |
-| GET    | /api/admin/services                | Danh sách toàn bộ dịch vụ (gồm cả dịch vụ đang ẩn is_visible = 0)                                   |
-| POST   | /api/admin/services                | Thêm dịch vụ mới                                                                                    |
-| PUT    | /api/admin/services/:id            | Sửa thông tin dịch vụ                                                                               |
-| PATCH  | /api/admin/services/:id/visibility | Bật/tắt nhanh trạng thái ẩn/hiện (is_visible)                                                       |
-| DELETE | /api/admin/services/:id            | Xóa dịch vụ                                                                                         |
-| GET    | /api/admin/admins                  | Danh sách tài khoản Quản trị viên (role = 'admin')                                                  |
-| POST   | /api/admin/admins                  | Tạo thêm tài khoản Admin mới                                                                        |
-| PUT    | /api/admin/admins/:id/password     | Đổi mật khẩu cho tài khoản Admin                                                                    |
-| DELETE | /api/admin/admins/:id              | Xóa tài khoản Admin (chặn tự xóa chính mình)                                                        |
+**Nguyên tắc:**
+
+- **Giá do máy chủ quyết định** (bảng `PLANS`); client chỉ gửi mã gói và chu kỳ.
+- Giá VNĐ được quy đổi sang USD theo tỷ giá cố định `USD_VND_RATE` (mặc định 25.000) vì PayPal không hỗ trợ VNĐ.
+- Khi chốt đơn, máy chủ **xác minh** trạng thái `COMPLETED`, loại tiền USD và số tiền đã thu khớp với đơn.
+- Việc cộng gói và Credits, đổi trạng thái `pending → paid` nằm trong một transaction; đơn đã `paid` thì gọi lại chỉ trả lại biên lai (không cộng lần hai).
+
+| Gói         | Giá tháng | Giá năm    | Credits / tháng |
+| ----------- | --------- | ---------- | --------------- |
+| Pro         | 79.000đ   | 790.000đ   | 500             |
+| Nhóm (team) | 199.000đ  | 1.990.000đ | 2.000           |
+
+## 5. Quản trị viên — `/api/admin`
+
+Toàn bộ đi qua `requireAuth` và `requireAdmin`.
+
+| Method | Endpoint                       | Mô tả                                                                                                                        |
+| ------ | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| GET    | /admin/overview                | Thống kê: số người dùng, số admin, người dùng trả phí, số dịch vụ, tổng lượt dùng, doanh thu; top dịch vụ; hoạt động gần đây |
+| GET    | /admin/users                   | Danh sách người dùng (role = user)                                                                                           |
+| PUT    | /admin/users/:id               | Sửa thông tin (`fullName`, `phone`, `planType`, `credits`)                                                                   |
+| PATCH  | /admin/users/:id/toggle-status | Khóa / mở khóa tài khoản người dùng                                                                                          |
+| PATCH  | /admin/users/:id/role          | Đổi quyền user ↔ admin (`role`)                                                                                              |
+| GET    | /admin/activity                | Nhật ký sử dụng công cụ (tối đa 500 dòng gần nhất)                                                                           |
+| GET    | /admin/services                | Danh sách toàn bộ dịch vụ (gồm cả dịch vụ đang ẩn)                                                                           |
+| POST   | /admin/services                | Thêm dịch vụ (`name`, `category`, `desc`, `status`, `visible`, `creditCost`)                                                 |
+| PUT    | /admin/services/:id            | Sửa dịch vụ                                                                                                                  |
+| DELETE | /admin/services/:id            | Xóa dịch vụ (409 nếu dịch vụ đã có lượt sử dụng)                                                                             |
+| GET    | /admin/admins                  | Danh sách quản trị viên                                                                                                      |
+| POST   | /admin/admins                  | Tạo tài khoản admin (`fullName`, `email`, `password`, `phone`)                                                               |
+
+**Ràng buộc an toàn:**
+
+- Không tự đổi quyền của chính mình; luôn còn ít nhất 1 admin.
+- Chỉ khóa / mở khóa được tài khoản có role `user`.
+- Tài khoản bị khóa không thể đăng nhập; các request mang cookie cũ cũng bị từ chối (403).
+
+## 6. Sức khỏe hệ thống
+
+| Method | Endpoint | Quyền  | Mô tả                                  |
+| ------ | -------- | ------ | -------------------------------------- |
+| GET    | /health  | Public | Kiểm tra máy chủ và kết nối SQL Server |

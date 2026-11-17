@@ -1,7 +1,12 @@
 const jwt = require("jsonwebtoken");
 const db = require("../config/database");
 
-const JWT_SECRET = process.env.JWT_SECRET || "toolnest_super_secret_key_2026";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+    throw new Error("Thiếu JWT_SECRET trong biến môi trường (.env)");
+}
+
 const COOKIE_NAME = "toolnest_token";
 
 const sendTokenCookie = (res, payload) => {
@@ -16,17 +21,23 @@ const sendTokenCookie = (res, payload) => {
     });
 };
 
-const requireAuth = (req, res, next) => {
+const requireAuth = async (req, res, next) => {
     try {
         const token = req.cookies?.[COOKIE_NAME];
         if (!token) {
-            return res.status(401).json({
-                success: false,
-                message: "Vui lòng đăng nhập để tiếp tục",
-            });
+            return res.status(401).json({ success: false, message: "Vui lòng đăng nhập để tiếp tục" });
         }
 
         const decoded = jwt.verify(token, JWT_SECRET);
+        const current = await db("users").where({ id: decoded.id }).select("status").first();
+
+        if (!current) {
+            return res.status(401).json({ success: false, message: "Tài khoản không tồn tại" });
+        }
+        if (current.status === "locked") {
+            return res.status(403).json({ success: false, message: "Tài khoản của bạn đã bị khoá" });
+        }
+
         req.user = decoded;
         next();
     } catch (error) {
@@ -55,19 +66,16 @@ const requireAdmin = async (req, res, next) => {
 };
 
 const optionalAuth = (req, res, next) => {
-    try {
-        const token = req.cookies?.[COOKIE_NAME];
-        if (token) {
+    const token = req.cookies?.[COOKIE_NAME];
+    if (token) {
+        try {
             req.user = jwt.verify(token, JWT_SECRET);
+        } catch {
+
         }
-    } catch (error) {
-        return res.status(401).json({
-            success: false,
-            message: "Bạn đã hết token! Nạp tiền đê!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-        });
     }
     next();
-}
+};
 
 module.exports = {
     COOKIE_NAME,
